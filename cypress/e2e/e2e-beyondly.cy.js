@@ -73,16 +73,79 @@ describe('Automation E2E Beyondly Ecommerce', () => {
                    expect(Number(text.replace(/[^\d]/g, ''))).to.eq(nominal);
                })
             })
+        cy.get('button').contains('Hapus semua').click();
+        cy.get('.chakra-text.styles_popup-delete__title__cMWtl.css-0').contains('Hapus semua pesanan dari Keranjang').should('be.visible');
+        cy.get('.chakra-button.styles_popup-delete__button__i5ksa.css-2ghkq0').click();
         cy.get('.style_title-wrapper__9CYu2')
             .find('svg')
             .first()
             .click();
 
-
-        // --- CHECKOUT - CEK PESANAN ---
         cy.get('#productDetail-button-buy').click({ force: true });
 
+        // --- CHECKOUT - CEK PESANAN ---
+        cy.url().should('include','/checkout/shipping');
+        cy.get('.styles_pickDelivery-desc-h1__r3Qjk').click();
+        cy.get('#chakra-modal--header-22').contains('Layanan Pengiriman').should('be.visible');
+        cy.get('div:nth-child(2) > label.styles_regular-delivery-content__NySsb').first().click();
+        cy.get('div.pickCourier_courier-container__s4da6.css-0').first().click();
+        cy.get('.chakra-text.styles_pickDelivery-desc-h1__r3Qjk.css-0')
+            .eq(0)
+            .invoke('text')
+            .as('kurir');
+        cy.get('.chakra-text.styles_pickDelivery-desc-h1__r3Qjk.css-0')
+            .eq(1)
+            .invoke('text')
+            .then((text) => Number(text.replace(/[^\d]/g, '')))
+            .as('ongkir');
+        cy.wait(1000);
+        cy.get('.styles_checkout-summary-total__9WH9V')
+            .invoke('text')
+            .then((text) => {
+                const totalSummary = Number(text.replace(/[^\d]/g, ''));
 
+                cy.get('@nominalBayar').then((nominal) => {
+                    cy.get('@ongkir').then((ongkir) => {
+                        const totalAll = nominal + ongkir;
+                        expect(totalAll).to.eq(totalSummary);
+                    });
+                });
+            });
+        cy.get('button').contains('Pilih Pembayaran').click();
+
+        // --- CHECKOUT - PILIH PEMBAYARAN ---
+        cy.url().should('include','/checkout/payment');
+        cy.url()
+            .then((url) => url.split('/').pop())
+            .as('invoiceNo');
+        cy.get('.style_title__1KaOz').contains('Transfer bank').should('be.visible');
+        cy.get('#accordion-button-4').first().click();
+        cy.get('.style_data-wrapper__wXfEb')
+            .eq(2)
+            .contains('Mandiri Virtual Account')
+            .should('be.visible')
+            .first()
+            .click();
+        cy.get('.style_payment-summary-total__kXrym')
+            .invoke('text')
+            .then((text) => {
+                const totalSummary = Number(text.replace(/[^\d]/g, ''));
+
+                cy.get('@nominalBayar').then((nominal) => {
+                    cy.get('@ongkir').then((ongkir) => {
+                        const totalAll = nominal + ongkir;
+                        expect(totalAll).to.eq(totalSummary);
+                    });
+                });
+            });
+        cy.get('button').contains('Bayar pesanan')
+            .should('be.visible')
+            .and('not.be.disabled')
+            .click();
+        cy.get('@invoiceNo').then((inv) => {
+            cy.url().should('include',`/checkout/payment-detail/${inv}`);
+        });
+        cy.get('.chakra-input.css-35gjr8')
         
     })
 
