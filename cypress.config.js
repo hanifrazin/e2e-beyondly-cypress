@@ -27,7 +27,7 @@ module.exports = defineConfig({
       })
     },
     chromeWebSecurity: false,
-    defaultCommandTimeout: 60000,
+    defaultCommandTimeout: 20000,
     env:{
       ...envVariables
     },
