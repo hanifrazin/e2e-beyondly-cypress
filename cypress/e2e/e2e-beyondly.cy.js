@@ -36,6 +36,7 @@ describe('Automation E2E Beyondly Ecommerce', () => {
             .first()
             .click();
         cy.url().should('include','/product-details');
+        cy.wait(1000);
         cy.get('h1.productDetail_productDetail-title__PSSNs')
             .invoke('text')
             .as('nmBarang');

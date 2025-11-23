@@ -32,4 +32,6 @@ module.exports = defineConfig({
       ...envVariables
     },
   },
+    video: true,
+    locale: 'en'
 });
